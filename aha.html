@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+          integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+
+
+
+
+
+<div>
+    <h1> hien thi cau hoi</h1>
+    <button onclick="findAll()">click</button>
+    <button onclick="showCreateForm()"> Tao moi ra day</button>
+    <div id="display"></div>
+</div>
+
+<script>
+
+
+
+    function findAll() {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/quests",
+            success: function (data) {
+                display(data)
+            }, error: function (error) {
+                console.log(error)
+            }
+        })
+    }
+
+
+        let show = document.getElementById("display");
+
+        function display(data) {
+            let str = ""
+            console.log(data)
+            for (let i = 0; i < data.length; i++) {
+                str += "<h1>" + data[i].content + data[i].type + "</h1>"
+            }
+            show.innerHTML = str;
+        }
+
+
+        function display(data) {
+            let str = ""
+            console.log(data)
+            for (let i = 0; i < data.length; i++) {
+                str += "<h1>" + data[i].content + "," + data[i].type + "</h1>"
+                    + "<button onclick='showEditForm( " + data[i].id + " )'>Sửa</button>"
+                    + "<button onclick='showDeleteForm( " + data[i].id + ") '>Xóa</button>"
+
+            }
+
+            show.innerHTML = str;
+
+        }
+
+
+
+        function showCreateForm() {
+            let str = " <input type=\"text\" id=\"content\">\n" +
+                " <input type=\"text\" id=\"type\">\n" +
+                " <button onclick='save()'> thêm </button>"
+            show.innerHTML = str;
+        }
+
+
+        function save() {
+            let content = document.getElementById("content").value;
+            let type = document.getElementById("type").value;
+            //1 chuoi gia tri
+            let chuoi = {
+                content: content,
+                type: type
+            }
+            $.ajax({
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-type': 'application/json',
+                },
+                type: 'POST',
+                url: "http://localhost:8080/quests",
+                //chuoi gia tri chuyen ve dang du lieu json
+                data: JSON.stringify(chuoi),
+                success: function (data) {
+                    //tra ve trang findAll
+                    // findAll()
+                    //hien thong bao thanh cong dang alert
+                    findAll();
+                },
+                error: function (error) {
+                    console.log(error)
+                }
+            })
+        }
+
+
+            function showDeleteForm(id){
+                if (confirm("U sure u want to do dis ?")){
+                    $.ajax({
+                        // headers :{
+                        //     'Accept':'application/json',
+                        //     'Content-type': 'application/json',
+
+                        type:'DELETE',
+                        url: 'http://localhost:8080/quests/'+id,
+                        success:function (){
+                            findAll()
+                        },
+                        error:function (error){
+                            console.log(error)
+                        }
+                    })
+                }
+
+            }
+
+
+            function showEditForm(id) {
+                let str = ""
+                $.ajax({
+                    type: "GET",
+                    url: "http://localhost:8080/quests/" + id,
+                    success: function (ques) {
+                        console.log(ques)
+                        let str = "    <input type=\"text\" id=\"content\" value='" + ques.content + "'>\n" +
+                            "    <input type=\"text\" id=\"type\"  value='" + ques.type + "'>\n" +
+                            "    <button onclick='edit(" + ques.id + ")'>Sửa</button>"
+                        show.innerHTML = str;
+                    }, error: function (error) {
+                        console.log(error);
+                    }
+                })
+            }
+
+            function edit(id) {
+                let content = document.getElementById("content").value;
+                let type = document.getElementById("type").value;
+                let ques = {
+                    content: content,
+                    type: type
+                }
+                $.ajax({
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    type: 'PUT',
+                    url: 'http://localhost:8080/quests/' + id,
+                    data: JSON.stringify(ques),
+                    success: function () {
+                        findAll()
+                    },
+                    error: function (error) {
+                        console.log(error)
+                    }
+                })
+        }
+
+</script>
+
+</body>
+</html>
